@@ -1,11 +1,51 @@
 ---
-import Welcome from '../components/Welcome.astro';
+import type {Poll} from '../types';
+import {PARTYKIT_HOST} from 'astro:env/client';
 import Layout from '../layouts/Layout.astro';
+import PollMaker from '../components/PollMaker';
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+if (Astro.request.method === 'POST') {
+	try {
+		const formData = await Astro.request.formData();
+		const title = formData.get('title')?.toString() ?? 'Anonymous poll';
+		const options: string[] = [];
+
+		for (const [key, value] of formData.entries()) {
+			if (
+				key.startsWith('option-') &&
+				value.toString().trim().length > 0
+			) {
+				options.push(value.toString());
+			}
+		}
+
+		const id = Math.random().toString(36).substring(2, 10);
+		const poll: Poll = {
+			title,
+			options,
+		};
+
+		await fetch(`${PARTYKIT_HOST}/party/${id}`, {
+			method: 'POST',
+			body: JSON.stringify(poll),
+			headers: {
+				'Content-Type': 'application/json',
+			},
+		});
+
+		return Astro.redirect(`/${id}`);
+	} catch (error) {
+		console.error('Failed to create poll:', error);
+	}
+}
 ---
 
-<Layout>
-	<Welcome />
+<Layout title="Create a Poll">
+	<main class="container mx-auto px-4 py-8 max-w-2xl">
+		<form method="POST">
+			<div class="flex flex-col space-y-6">
+				<PollMaker client:load />
+			</div>
+		</form>
+	</main>
 </Layout>

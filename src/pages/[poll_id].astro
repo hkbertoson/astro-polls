@@ -1,0 +1,64 @@
+---
+import {PARTYKIT_HOST} from 'astro:env/client';
+import type {Poll} from '../types';
+import PollUI from '../components/PollUI';
+import Layout from '../layouts/Layout.astro';
+
+const {poll_id} = Astro.params;
+
+let poll: Poll | null = null;
+let error = null;
+
+try {
+	const req = await fetch(`${PARTYKIT_HOST}/party/${poll_id}`, {
+		method: 'GET',
+		headers: {
+			'Content-Type': 'application/json',
+		},
+	});
+
+	if (!req.ok) {
+		if (req.status === 404) {
+			return Astro.redirect('/404');
+		}
+		throw new Error('Something went wrong.');
+	}
+
+	poll = await req.json();
+} catch (e) {
+	error = e;
+	console.error('Failed to fetch poll:', e);
+}
+---
+
+<Layout title={poll?.title || 'Poll'}>
+	{
+		error && (
+			<div class="text-red-500">
+				An error occurred while loading the poll. Please try again
+				later.
+			</div>
+		)
+	}
+
+	{
+		poll && (
+
+				<div class="flex flex-col space-y-4">
+					<h1 class="text-2xl font-bold">{poll.title}</h1>
+					<PollUI
+						client:load
+						id={poll_id!}
+						options={poll.options}
+						initialVotes={poll.votes}
+					/>
+				</div>
+				<div class="font-medium text-lg pt-8 text-center">
+					<a class="underline" href="/">
+						Create your own poll!
+					</a>
+				</div>
+
+		)
+	}
+</Layout>
