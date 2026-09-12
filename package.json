@@ -9,10 +9,10 @@
     "astro": "astro"
   },
   "dependencies": {
-    "@astrojs/cloudflare": "^12.1.0",
-    "@astrojs/solid-js": "^5.0.1",
-    "@astrojs/tailwind": "^5.1.4",
-    "astro": "^5.1.2",
+    "@astrojs/cloudflare": "^14.0.0",
+    "@astrojs/solid-js": "^7.0.0",
+    "@astrojs/tailwind": "^6.0.0",
+    "astro": "^7.0.0",
     "partysocket": "1.0.3",
     "solid-js": "^1.9.3",
     "tailwindcss": "^3.4.17"
